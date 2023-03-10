@@ -10,7 +10,6 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app(config=None):
-    print('run: create_app()')
     app = Flask(__name__)
 
 
