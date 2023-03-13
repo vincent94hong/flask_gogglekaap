@@ -247,15 +247,48 @@ const MEMO = (function(){
     if (STATUS) {
       PAGE += 1;
       data = _getParams();
-      console.log('getMemos')
-      // TODO
-      // 1) 로딩아이콘 토글링: beforeSend - toggle loading icon
-      // 2) 조회한 메모 데이터 생성: loop _makeMemoHtml
-      // 3) 컨테이너에 추가: append to grid
-      // 4) 에러 얼럿 노출 및 추가 조회 스테이터스 업데이트: error e.responseText, set status
-      // 5) 에러시 추가데이터 없을경우 인포 아이템 추가: append no more item
-      // 6) 완료시, 로딩아이콘 토글링: complete - toggle loading icon with setTimeout
-      // 5) 그리드 리셋: done - _resetGridLayout()
+      // console.log('getMemos')
+      // // TODO
+      // // 1) 로딩아이콘 토글링: beforeSend - toggle loading icon
+      // // 2) 조회한 메모 데이터 생성: loop _makeMemoHtml
+      // // 3) 컨테이너에 추가: append to grid
+      // // 4) 에러 얼럿 노출 및 추가 조회 스테이터스 업데이트: error e.responseText, set status
+      // // 5) 에러시 추가데이터 없을경우 인포 아이템 추가: append no more item
+      // // 6) 완료시, 로딩아이콘 토글링: complete - toggle loading icon with setTimeout
+      // // 5) 그리드 리셋: done - _resetGridLayout()
+      $.ajax({
+        url: "/api/memos",
+        type: "get",
+        data: data,
+        beforeSend: function(){
+          $customActions.addClass('inactive');
+        },
+        success: function(r){
+          let itemHtmls = '';
+          $.each(r, function(_, el){
+            itemHtmls += _makeMemoHtml(el);
+          });
+          itemHtmls += _makeMoreItemHtml();
+          const $items = $(itemHtmls);
+          $GRID.append($items).masonry('appended', $items);
+        },
+        error: function(e){
+          STATUS = false;
+          if (e.status == 404){
+            let html = _makeNoMoreItemHtml();
+            let $html = $(html);
+            $GRID.append($html).masonry('appended', $html);
+          } else {
+            alert(e.responseText);
+          }
+        },
+        complete: function() {
+          _resetGridLayout();
+          setTimeout(function(){
+            $customActions.removeClass('inactive');
+          }, 1000)
+        }
+      })
     }
   };
 
@@ -265,10 +298,25 @@ const MEMO = (function(){
   const getMemo = function(id){
     /* GET /api/memos/{id} */
 
-    console.log('getMemo', id);
+    // console.log('getMemo', id);
     // TODO
     // 1) 모달 필드를 리셋해준다: beforeSend - resetModalFields
     // 2) 조회한 데이터로 모달 필드를 반영하고, 텍스트 에리어를 트리거링 한다
+
+    $.ajax({
+      url: '/api/memos/' + id,
+      type: 'get',
+      beforeSend: function(){
+        resetModalFields();
+      },
+      success: function(r){
+        $modalTitle.val(r.title);
+        $modalContent.val(r.content);
+        $modalClose.attr('data-id', r.id);
+        // TODO 이미지 랜더링 추가
+        $modalContent.trigger('keyup');
+      }
+    })
   };
 
   /* 메모 삭제 */
@@ -297,7 +345,7 @@ const MEMO = (function(){
     const $media = $item.find('.item-media');
     const data = new FormData(form);
 
-    console.log('updateMemo');
+    // console.log('updateMemo');
     if ($modalModified.val() == 1) {
       // TODO
       // 1) AJAX form
@@ -305,6 +353,25 @@ const MEMO = (function(){
       // 3) 리턴값 메모 아이템에 반영
       // 4) 에러 노출
       // 5) 완료시 모달리셋: done - resetModalFields(true)
+      $.ajax({
+        url: '/api/memos/' + id,
+        type: 'put',
+        data: data,
+        enctype: 'multipart/form-data',
+        contentType: false,
+        processData: false,
+        success: function(r){
+          $title.html(r.title);
+          $content.html(r.content);
+          // TODO 링크 이미지 랜더링
+        },
+        error: function(e){
+          alert(e.responseText);
+        },
+        complete: function(){
+          resetModalFields(true);
+        }
+      });
     }
   };
 

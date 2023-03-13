@@ -57,6 +57,11 @@ def create_app(config=None):
     '''Restx INIT'''
     from gogglekaap.apis import blueprint as api
     app.register_blueprint(api)    
+    csrf.exempt(api) # csrf 토큰을 production 모드에 주어도, api/docs 문서는 사용할 수 없음. 이를 사용할 수 있게 하는 코드
+
+    # production 모드에서 특정 ip 에서만 api/docs 페이지에 csrf 를 주어 사용할 수 있게 함.
+    # if request.reomote_addr == '123.123.123.123':
+    #     csrf.exempt(api)
 
 
     '''REQUEST HOOK'''
