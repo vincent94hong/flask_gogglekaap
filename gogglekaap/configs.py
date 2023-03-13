@@ -9,6 +9,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:password@localhost/gogglekaap?charset=utf8'
     # SQLALCHEMY_TRACK_MODIFICATIONS = False # SQLALCHEMY_TRACK_MODIFICATIONS 에러발생시 설정.
     SWAGGER_UI_DOC_EXPANSION = 'list'
+    USER_STATIC_BASE_DIR = 'user_images'
 
 class DevelopmentConfig(Config):
     '''Flask Config for dev'''

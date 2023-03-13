@@ -289,4 +289,12 @@ poetry.toml
 # ruff
 .ruff_cache/
 
+# sqlite
+*.db
+
+# user imaages
+gogglekaap/static/user_images
+
+.vscode
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,flask,python
