@@ -158,18 +158,18 @@ class MemoList(Resource):
         labels = args['labels']
         if labels:
             for cnt in labels:
-                if cnt:
-                    label = LabelModel.query.filter(
-                        LabelModel.content == cnt,
-                        LabelModel.user_id == g.user.id
-                    ).first()
+                # if cnt:
+                label = LabelModel.query.filter(
+                    LabelModel.content == cnt,
+                    LabelModel.user_id == g.user.id
+                ).first()
 
-                    if not label:
-                        label = LabelModel(
-                            content = cnt,
-                            user_id = g.user.id
-                        )
-                    memo.labels.append(label)
+                if not label:
+                    label = LabelModel(
+                        content = cnt,
+                        user_id = g.user.id
+                    )
+                memo.labels.append(label)
                     
         g.db.add(memo)
         g.db.commit()
@@ -219,19 +219,19 @@ class Memo(Resource):
         if labels:
             memo.labels.clear()
             for cnt in labels:
-                if cnt:
-                    label = LabelModel.query.filter(
-                        LabelModel.content == cnt,
-                        LabelModel.user_id == g.user.id
-                    ).first()
+                # if cnt:
+                label = LabelModel.query.filter(
+                    LabelModel.content == cnt,
+                    LabelModel.user_id == g.user.id
+                ).first()
 
-                    if not label:
-                        label = LabelModel(
-                            content = cnt,
-                            user_id = g.user.id
-                        )
-                    
-                    memo.labels.append(label)
+                if not label:
+                    label = LabelModel(
+                        content = cnt,
+                        user_id = g.user.id
+                    )
+                
+                memo.labels.append(label)
 
         g.db.commit()
         return memo
