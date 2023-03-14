@@ -469,13 +469,29 @@ const MEMO = (function(){
   const getLabels = function(){
     /*  GET /api/labels */
 
-    console.log('getLabels');
+    // console.log('getLabels');
     // TODO
     // 1) 라벨 조회
     // 2) 라벨 버튼 생성: loop _makeLabelBtnHtml
     // 3) (!) 메모 버튼 뒤에 삽입
     // 4) 메모리에 라벨 데이터 저장
     // 5) 에러시 얼럿 노출
+
+    $.ajax({
+      url: '/api/labels',
+      type: 'get',
+      success: function(r){
+        let html = '';
+        $.each(r, function(_, el){
+          html += _makeLabelBtnHtml(el);
+        });
+        $('#sidemenu').find('.sidemenu-btn-memo').after(html);
+        MEMORY_LABELS = r;
+      },
+      error: function(e){
+        alert(e.responseText);
+      }
+    })
   }
 
   /* 라벨 생성 */
@@ -486,7 +502,7 @@ const MEMO = (function(){
     $input = $(e.target);
     const val = $input.val();
     if (val != '') {
-      console.log('addLabel');
+      // console.log('addLabel');
       // TODO
       // 1) 라벨 추가
       // 2) 라벨 버튼 생성: _makeLabelBtnHtml
@@ -494,6 +510,23 @@ const MEMO = (function(){
       // 4) 인풋 초기화
       // 5) 메모리에 라벨 추가
       // 6) 에러시 얼럿 노출
+
+      $.ajax({
+        url: '/api/labels',
+        type: 'post',
+        data: {
+          content: val
+        },
+        success: function(r){
+          let html = _makeLabelBtnHtml(r);
+          $('.sidemenu-label-add-btn').before(html);
+          $input.val('');
+          MEMORY_LABELS.push(r);
+        },
+        error: function(e){
+          alert(e.responseText);
+        }
+      })
     }
   }
 
@@ -505,7 +538,7 @@ const MEMO = (function(){
     c = confirm('라벨을 정말 삭제하시겠습니까?')
     if (!c) return false;
 
-    console.log('deleteLabel', id);
+    // console.log('deleteLabel', id);
     // TODO
     // 1) 라벨 삭제
     // 2) 라벨 메뉴 아이템 삭제
@@ -513,6 +546,27 @@ const MEMO = (function(){
     // 4) 메모리 라벨 팝
     // 5) 에러시 얼럿노출
     // 6) 완료시 그리드 리셋: done - _resetGridLayout()
+
+    $.ajax({
+      url: '/api/labels/' + id,
+      type: 'delete',
+      success: function(r){
+        $(e.target).closest('button.sidemenu-btn').remove();
+        $('.mdl-chip[data-label-id="' + id + '"]').remove();
+        $.each(MEMORY_LABELS, function(i, v){
+          if (v.id == id) {
+            MEMORY_LABELS.pop(i);
+            return false;  
+          }
+        });
+      },
+      error: function(e){
+        alert(e.responseText);
+      },
+      complete: function(){
+        _resetGridLayout();
+      }
+    })
   }
 
   /* 메모에 라벨 적용 */
@@ -525,7 +579,7 @@ const MEMO = (function(){
       labels.push($(item).val());
     });
 
-    console.log('attachLabels', id);
+    // console.log('attachLabels', id);
     // TODO
     // 1) 메모 업데이트 호출
     // 2) 라벨 데이터 콤마 스트링처리
@@ -533,6 +587,25 @@ const MEMO = (function(){
     // 4) 메모 아이템에 라벨 칩 추가
     // 5) 에러시 얼럿 노출
     // 6) 완료 시 그리드 리셋: _resetGridLayout()
+
+    $.ajax({
+      url: '/api/memos/' + id,
+      type: 'put',
+      data: {
+        labels: labels.join(',')
+      },
+      success: function(r){
+        let html = '';
+        html += _makeLabelChipHtml(r);
+        $item.find('.item-chip').html(html);
+      },
+      error: function(e){
+        alert(e.responseText);
+      },
+      complete: function(){
+        _resetGridLayout();
+      }
+    })
   }
 
   /* 메모 검색 조회 */
